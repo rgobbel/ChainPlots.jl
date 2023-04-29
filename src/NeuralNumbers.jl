@@ -4,25 +4,27 @@ import Random
 import Base: isless, ==
 import Functors: fmap
 
-"""
-    NeuralNumber <: Real
+NNBaseType = Float32 # mainly for convenient experimentation with datatypes for this package
 
-NeuralNumber encodes the "state" of a neuron as an Int8.
+"""
+    NeuralNumber <: Union{Real, AbstractFloat, NNBaseType}
+
+NeuralNumber encodes the "state" of a neuron as a $(NNBaseType).
 
 The possible states are:
-    * `state = Int8(0)` for a "cold", or "off", state, meaning it can be triggered by a signal but it has not yet been triggered. It works as a neutral element in any diadic operation.
-    * `state = Int8(1)` for a "hot", or "on", state, meaning it has been triggered by a signal.
+    * `state = $(NNBaseType(0))` for a "cold", or "off", state, meaning it can be triggered by a signal but it has not yet been triggered. It works as a neutral element in any diadic operation.
+    * `state = $(NNBaseType(1))` for a "hot", or "on", state, meaning it has been triggered by a signal.
 
 The aliases are
-    * `cold = NeuralNumber(Int8(0))`
-    * `hot = NeuralNumber(Int8(1))`
+    * `cold = NeuralNumber(NNBaseType(0))`
+    * `hot = NeuralNumber(NNBaseType(1))`
 """
-struct NeuralNumber <: Real
-    state::Int8
+struct NeuralNumber <: Union{Real, AbstractFloat, NNBaseType}
+    state::NNBaseType
 end
 
-const cold = NeuralNumber(Int8(0))
-const hot = NeuralNumber(Int8(1))
+const cold = NeuralNumber(NNBaseType(0))
+const hot = NeuralNumber(NNBaseType(1))
 
 Base.show(io::IO, x::NeuralNumber) = print(io, x == hot ? "hot" : "cold")
 Base.show(io::IO, ::MIME"text/plain", x::NeuralNumber) = print(io, "NeuralNumber:\n  ", x)
@@ -31,7 +33,7 @@ NeuralNumber(::Number) = cold
 (::Type{NeuralNumber})(x::NeuralNumber) = x
 Base.convert(::Type{NeuralNumber}, y::Number) = cold
 Base.convert(::Type{NeuralNumber}, y::NeuralNumber) = y
-
+Base.convert(T::Type{<:Number}, y::NeuralNumber) = Base.convert(T, y.state)
 Base.float(x::NeuralNumber) = x
 
 ==(::NeuralNumber, ::Number) = false
